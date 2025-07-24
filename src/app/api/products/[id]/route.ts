@@ -4,9 +4,9 @@ import { saveImage } from '@/lib/utils/save-image';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   const formData = await request.formData();
   const name = formData.get('name') as string | undefined;
   const points = formData.get('points')

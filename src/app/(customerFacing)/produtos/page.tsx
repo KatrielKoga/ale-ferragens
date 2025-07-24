@@ -2,7 +2,6 @@
 
 import WhatsappButton from '@/components/Whatsapp-button';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ProductResponse } from '../../../lib/interfaces';
 
