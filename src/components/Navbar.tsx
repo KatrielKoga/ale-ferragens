@@ -1,6 +1,7 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -24,7 +25,12 @@ function Navbar({
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-white">
-            Alê Ferragens
+            <Image
+              src="/logo.svg"
+              alt="Alê Ferragens"
+              width={150}
+              height={150}
+            />
           </Link>
 
           {/* Desktop Navigation */}

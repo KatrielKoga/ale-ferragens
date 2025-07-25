@@ -77,7 +77,9 @@ const ContactSection = () => (
         </div>
         <div className="flex items-center space-x-4">
           <Phone className="h-6 w-6 text-blue-600" />
-          <p className="text-gray-700">(11) 98765-4321</p>
+          <p className="text-gray-700">
+            (27) 9 9842 - 3648 <br /> (38) 9 9806 - 4885
+          </p>
         </div>
         <WhatsappButton text="Fale Conosco no WhatsApp" />
       </div>
