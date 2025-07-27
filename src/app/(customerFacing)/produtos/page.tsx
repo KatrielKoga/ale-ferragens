@@ -52,11 +52,20 @@ export default function Produtos() {
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
               >
                 <Image
-                  src={reward.image}
+                  src={reward.image || '/default.svg'}
                   alt={reward.name}
                   width={400}
                   height={300}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-scale-down"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (
+                      target.src !==
+                      window.location.origin + '/default.svg'
+                    ) {
+                      target.src = '/default.svg';
+                    }
+                  }}
                 />
                 <div className="p-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">

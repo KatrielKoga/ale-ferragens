@@ -43,7 +43,6 @@ export default function Pontos() {
         return;
       }
       if (!res.ok) {
-        console.log(await res.json());
         throw new Error('Documento não encontrado');
       }
       const data: UserByDocumentResponse = await res.json();
