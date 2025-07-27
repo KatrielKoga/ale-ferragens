@@ -23,8 +23,6 @@ export async function PATCH(
     image = await saveImage(imageFile);
   }
 
-  console.log(name, points, description, imageFile, active);
-
   const product = await prisma.product.update({
     where: { id },
     data: {

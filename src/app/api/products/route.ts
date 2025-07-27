@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   let formData: FormData;
-  console.log(request.body);
   try {
     formData = await request.formData();
   } catch (err) {

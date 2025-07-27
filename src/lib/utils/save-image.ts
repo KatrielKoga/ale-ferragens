@@ -13,7 +13,11 @@ export async function saveImage(imageFile: File) {
     // Save the file in the public folder
     const arrayBuffer = await imageFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const publicPath = path.join(process.cwd(), 'public/images', fileName);
+    const imagesDir = path.join(process.cwd(), 'public/images');
+    if (!fs.existsSync(imagesDir)) {
+      fs.mkdirSync(imagesDir, { recursive: true });
+    }
+    const publicPath = path.join(imagesDir, fileName);
     fs.writeFileSync(publicPath, buffer);
     return '/images/' + fileName;
   } catch (error) {
