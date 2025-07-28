@@ -47,6 +47,9 @@ export const userByDocumentResponse = z.object({
     z.object({
       points: z.number(),
       createdAt: z.date(),
+      product: z.object({
+        name: z.string(),
+      }),
     })
   ),
 });

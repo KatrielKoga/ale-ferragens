@@ -47,6 +47,7 @@ export default function Pontos() {
       }
       const data: UserByDocumentResponse = await res.json();
       setDados(data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError(
         'Documento não encontrado. Verifique o CPF/CNPJ e tente novamente.'
@@ -184,11 +185,14 @@ export default function Pontos() {
                       <div>
                         <TicketCheck size={18} className="text-blue-500 mr-3" />
                       </div>
-                      {Intl.NumberFormat('pt-BR', {
-                        style: 'decimal',
-                      }).format(item.points)}{' '}
-                      pontos - Resgate{' '}
-                      {new Date(item.createdAt).toLocaleDateString('pt-BR')}
+                      <p className="text-center">
+                        {Intl.NumberFormat('pt-BR', {
+                          style: 'decimal',
+                        }).format(item.points)}{' '}
+                        pontos - Resgate{' '}
+                        <b className="font-bold">{item.product.name}</b> -{' '}
+                        {new Date(item.createdAt).toLocaleDateString('pt-BR')}
+                      </p>
                     </li>
                   ))
                 ) : (
