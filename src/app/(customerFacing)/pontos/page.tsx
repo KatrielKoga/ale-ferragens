@@ -26,9 +26,7 @@ export default function Pontos() {
 
     try {
       const res = await fetch(
-        `/api/users/${encodeURIComponent(
-          documento.replace(/\./g, '').replace(/\-/g, '')
-        )}`
+        `/api/users/${encodeURIComponent(documento.replace(/\D/g, ''))}`
       );
       if (res.status === 404) {
         setDados({
