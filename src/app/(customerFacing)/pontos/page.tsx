@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import WhatsappButton from '@/components/Whatsapp-button';
-import { UserByDocumentResponse } from '../../../lib/interfaces';
+import { UserByDocumentResponse } from '@/lib/interfaces';
+import { formatCpfCnpjInput } from '@/lib/formatters';
 
 export default function Pontos() {
   const [documento, setDocumento] = useState('');
@@ -55,25 +56,6 @@ export default function Pontos() {
     }
   };
 
-  function formatCpfCnpj(input: string) {
-    let value = input.replace(/\D/g, '');
-
-    if (value.length <= 11) {
-      value = value
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    } else {
-      value = value
-        .replace(/^(\d{2})(\d)/, '$1.$2')
-        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-        .replace(/\.(\d{3})(\d)/, '.$1/$2')
-        .replace(/(\d{4})(\d)/, '$1-$2');
-    }
-
-    setDocumento(value);
-  }
-
   return (
     <section className="min-h-screen bg-gray-100 py-10 flex justify-center flex-col items-center gap-10">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md h-full">
@@ -94,7 +76,7 @@ export default function Pontos() {
             placeholder="Digite seu CPF ou CNPJ"
             maxLength={18}
             value={documento}
-            onChange={(e) => formatCpfCnpj(e.target.value)}
+            onChange={(e) => formatCpfCnpjInput(e.target.value, setDocumento)}
             className="w-full text-gray-900 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
             required
           />

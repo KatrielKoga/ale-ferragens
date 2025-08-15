@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { formatPoints } from '../../../lib/formatters';
+import { formatDocument, formatPoints } from '@/lib/formatters';
 
 type UserOption = {
   id: string;
@@ -27,13 +27,6 @@ type Redeem = {
     name: string;
   };
 };
-
-function formatDocument(document: string) {
-  if (document.length === 11) {
-    return document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  }
-  return document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3/$4');
-}
 
 function RedeemForm({
   onSubmit,

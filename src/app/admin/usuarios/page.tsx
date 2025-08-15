@@ -6,7 +6,10 @@ import {
   UserCreateBody,
   UserResponse,
 } from '@/lib/interfaces/users';
-import { formatPoints } from '../../../lib/formatters';
+import { addDocMask, formatDocument, formatPoints } from '@/lib/formatters';
+import Link from 'next/link';
+import { EyeIcon } from 'lucide-react';
+import { Pagination } from '@/components/Pagination';
 
 function UserForm({
   onSubmit,
@@ -21,7 +24,9 @@ function UserForm({
   const [errors, setErrors] = useState<string | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
+    // eslint-disable-next-line prefer-const
+    let { name, value } = e.target;
+    if (name == 'document') value = addDocMask(value);
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -96,20 +101,24 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
-  async function fetchUsers(searchValue = '') {
+  async function fetchUsers() {
     setLoading(true);
     const params = new URLSearchParams();
-    if (searchValue) params.set('search', searchValue);
+    if (search) params.set('search', search);
+    if (page > 1) params.set('page', page.toString());
     const res = await fetch(`/api/users?${params.toString()}`);
     const data = await res.json();
-    setUsers(data);
+    setUsers(data || []);
+    setHasMore((data || []).length === 5);
     setLoading(false);
   }
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page]);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearch(e.target.value);
@@ -117,7 +126,7 @@ export default function AdminUsersPage() {
 
   function handleSearchSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    fetchUsers(search);
+    fetchUsers();
   }
 
   async function handleCreate(user: UserCreateBody) {
@@ -141,16 +150,6 @@ export default function AdminUsersPage() {
     } finally {
       setCreating(false);
     }
-  }
-
-  function formatDocument(document: string) {
-    if (document.length === 11) {
-      return document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    }
-    return document.replace(
-      /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-      '$1.$2.$3/$4-$5'
-    );
   }
 
   return (
@@ -193,6 +192,7 @@ export default function AdminUsersPage() {
               <th className="p-2 border-b">Documento</th>
               <th className="p-2 border-b">Pontos</th>
               <th className="p-2 border-b">Criado em</th>
+              <th className="p-2 border-b">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -221,11 +221,19 @@ export default function AdminUsersPage() {
                   <td className="p-2 border-b text-center">
                     {new Date(user.createdAt).toLocaleDateString('pt-BR')}
                   </td>
+                  <td className="p-2 border-b text-center">
+                    <Link href={`/admin/usuarios/${user.id}`}>
+                      <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                        <EyeIcon className="w-4 h-4" />
+                      </button>
+                    </Link>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+        <Pagination page={page} hasMore={hasMore} setPage={setPage} />
       </div>
     </div>
   );

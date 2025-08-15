@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const limit = searchParams.get('limit');
+  const page = searchParams.get('page');
   const search = searchParams.get('search');
   const users = await prisma.user.findMany({
     select: {
@@ -32,6 +33,7 @@ export async function GET(request: NextRequest) {
       createdAt: 'desc',
     },
     take: limit ? parseInt(limit) : 5,
+    skip: page ? (parseInt(page) - 1) * (limit ? parseInt(limit) : 5) : 0,
   });
   const usersWithPoints = users.map((user) => ({
     ...user,
