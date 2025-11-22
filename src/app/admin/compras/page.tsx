@@ -169,6 +169,25 @@ export default function AdminPurchasesPage() {
     }
   }
 
+  async function handleDeletePurchase(id: string) {
+    if (window.confirm('Tem certeza que deseja excluir esta compra?')) {
+      fetch(`/api/orders/${id}`, {
+        method: 'DELETE',
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            fetchPurchases();
+          } else {
+            const error = await res.json();
+            alert(error.error || 'Erro ao excluir compra');
+          }
+        })
+        .catch(() => {
+          alert('Erro ao excluir compra');
+        });
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Adicionar Compra</h1>
@@ -181,6 +200,7 @@ export default function AdminPurchasesPage() {
               <th className="p-2 border-b">Usuário</th>
               <th className="p-2 border-b">Pontos</th>
               <th className="p-2 border-b">Data</th>
+              <th className="p-2 border-b">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -205,6 +225,14 @@ export default function AdminPurchasesPage() {
                   </td>
                   <td className="p-2 border-b text-center">
                     {new Date(purchase.createdAt).toLocaleDateString('pt-BR')}
+                  </td>
+                  <td className="p-2 border-b text-center">
+                    <button
+                      className="text-red-600 hover:underline"
+                      onClick={() => handleDeletePurchase(purchase.id)}
+                    >
+                      Excluir
+                    </button>
                   </td>
                 </tr>
               ))

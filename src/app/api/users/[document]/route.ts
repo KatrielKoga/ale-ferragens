@@ -47,9 +47,21 @@ export async function GET(
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
+
+  const [orders, redeems] = await Promise.all([
+    prisma.order.findMany({
+      where: { userId: user.id,  },
+      select: { points: true },
+    }),
+    prisma.redeem.findMany({
+      where: { userId: user.id },
+      select: { points: true },
+    }),
+  ]);
+
   const userPoints =
-    user.orders.reduce((acc, order) => acc + order.points, 0) -
-    user.redeems.reduce((acc, redeem) => acc + redeem.points, 0);
+    orders.reduce((acc: number, order: { points: number }) => acc + order.points, 0) -
+    redeems.reduce((acc: number, redeem: { points: number }) => acc + redeem.points, 0);
   return NextResponse.json({
     ...user,
     points: userPoints,
