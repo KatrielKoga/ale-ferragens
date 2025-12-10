@@ -3,6 +3,7 @@
 import { orderCreateBody, OrderResponse } from '@/lib/interfaces/orders';
 import React, { useEffect, useState } from 'react';
 import { formatDocument, formatPoints } from '@/lib/formatters';
+import { Pagination } from '../../../components/Pagination';
 
 type UserOption = {
   id: string;
@@ -128,18 +129,24 @@ export default function AdminPurchasesPage() {
   const [purchases, setPurchases] = useState<OrderResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   async function fetchPurchases() {
     setLoading(true);
-    const res = await fetch('/api/orders?limit=10');
+    const params = new URLSearchParams();
+    if (page > 1) params.set('page', page.toString());
+    params.set('limit', '10');
+    const res = await fetch(`/api/orders?${params.toString()}`);
     const data = await res.json();
     setPurchases(data);
+    setHasMore((data || []).length === 10);
     setLoading(false);
   }
 
   useEffect(() => {
     fetchPurchases();
-  }, []);
+  }, [page]);
 
   async function handleCreatePurchase({
     userId,
@@ -217,28 +224,33 @@ export default function AdminPurchasesPage() {
                 </td>
               </tr>
             ) : (
-              purchases.map((purchase) => (
-                <tr key={purchase.id}>
-                  <td className="p-2 border-b">{purchase.user?.name || '-'}</td>
-                  <td className="p-2 border-b text-right">
-                    {formatPoints(purchase.points)}
-                  </td>
-                  <td className="p-2 border-b text-center">
-                    {new Date(purchase.createdAt).toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="p-2 border-b text-center">
-                    <button
-                      className="text-red-600 hover:underline"
-                      onClick={() => handleDeletePurchase(purchase.id)}
-                    >
-                      Excluir
-                    </button>
-                  </td>
-                </tr>
-              ))
+              purchases.map((purchase) => {
+                const { user } = purchase;
+                const userName = `${user.name} - ${user.document}`;
+                return (
+                  <tr key={purchase.id}>
+                    <td className="p-2 border-b">{userName}</td>
+                    <td className="p-2 border-b text-right">
+                      {formatPoints(purchase.points)}
+                    </td>
+                    <td className="p-2 border-b text-center">
+                      {new Date(purchase.createdAt).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="p-2 border-b text-center">
+                      <button
+                        className="text-red-600 hover:underline"
+                        onClick={() => handleDeletePurchase(purchase.id)}
+                      >
+                        Excluir
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
+        <Pagination page={page} hasMore={hasMore} setPage={setPage} />
       </div>
     </div>
   );

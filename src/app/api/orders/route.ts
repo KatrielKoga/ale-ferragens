@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
       user: {
         select: {
           name: true,
+          document: true,
         },
       },
     },
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
       createdAt: 'desc',
     },
     take: limit ? parseInt(limit) : 10,
-    skip: page ? parseInt(page) * (limit ? parseInt(limit) : 10) : 0,
+    skip: page ? (parseInt(page) - 1) * (limit ? parseInt(limit) : 10) : 0,
   });
   return NextResponse.json(orders);
 }

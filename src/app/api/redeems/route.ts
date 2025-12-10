@@ -36,20 +36,24 @@ export async function GET(request: NextRequest) {
   const limit = searchParams.get('limit');
   const page = searchParams.get('page');
 
-  let user = null;
-  if (search) {
-    user = await prisma.user.findFirst({
-      where: {
-        document: search,
-      },
-    });
-  }
-
   const redeems = await prisma.redeem.findMany({
     where: {
-      ...(user && {
-        userId: user.id,
-      }),
+      ...(search
+        ? {
+            OR: [
+              {
+                user: {
+                  name: { contains: search || '', mode: 'insensitive' },
+                },
+              },
+              {
+                product: {
+                  name: { contains: search || '', mode: 'insensitive' },
+                },
+              },
+            ],
+          }
+        : {}),
     },
     orderBy: {
       createdAt: 'desc',
@@ -58,6 +62,7 @@ export async function GET(request: NextRequest) {
       user: {
         select: {
           name: true,
+          document: true,
         },
       },
       product: {
@@ -67,7 +72,7 @@ export async function GET(request: NextRequest) {
       },
     },
     take: limit ? parseInt(limit) : 10,
-    skip: page ? parseInt(page) * (limit ? parseInt(limit) : 10) : 0,
+    skip: page ? (parseInt(page) - 1) * (limit ? parseInt(limit) : 10) : 0,
   });
   return NextResponse.json(redeems);
 }

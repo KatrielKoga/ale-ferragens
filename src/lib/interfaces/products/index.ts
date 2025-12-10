@@ -17,6 +17,9 @@ export const productResponse = z.object({
   image: z.string(),
   createdAt: z.date(),
   code: z.coerce.number(),
+  _count: z.object({
+    redeems: z.number(),
+  }),
 });
 
 export type ProductResponse = z.infer<typeof productResponse>;

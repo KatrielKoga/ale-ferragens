@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { formatDocument, formatPoints } from '@/lib/formatters';
+import { Pagination } from '../../../components/Pagination';
 
 type UserOption = {
   id: string;
@@ -22,6 +23,7 @@ type Redeem = {
   createdAt: string;
   user: {
     name: string;
+    document: string;
   };
   product: {
     name: string;
@@ -188,18 +190,26 @@ export default function AdminResgatesPage() {
   const [redeems, setRedeems] = useState<Redeem[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [search, setSearch] = useState('');
 
   async function fetchRedeems() {
     setLoading(true);
-    const res = await fetch('/api/redeems?limit=10');
+    const params = new URLSearchParams();
+    if (page > 1) params.set('page', page.toString());
+    if (search) params.set('search', search);
+    params.set('limit', '10');
+    const res = await fetch(`/api/redeems?${params.toString()}`);
     const data = await res.json();
     setRedeems(data);
+    setHasMore((data || []).length === 10);
     setLoading(false);
   }
 
   useEffect(() => {
     fetchRedeems();
-  }, []);
+  }, [page]);
 
   async function handleCreateRedeem({
     userId,
@@ -248,10 +258,34 @@ export default function AdminResgatesPage() {
     }
   }
 
+  function handleSearchSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    fetchRedeems();
+  }
+
+  function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setSearch(e.target.value);
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Adicionar Resgate</h1>
       <RedeemForm onSubmit={handleCreateRedeem} loading={creating} />
+      <form onSubmit={handleSearchSubmit} className="mb-4 flex gap-2">
+        <input
+          type="text"
+          placeholder="Buscar"
+          value={search}
+          onChange={handleSearchChange}
+          className="border px-2 py-1 rounded flex-1"
+        />
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+        >
+          Buscar
+        </button>
+      </form>
       <div className="bg-white rounded shadow mt-6">
         <h2 className="text-lg font-semibold p-4 border-b">Últimos Resgates</h2>
         <table className="w-full text-left">
@@ -278,31 +312,36 @@ export default function AdminResgatesPage() {
                 </td>
               </tr>
             ) : (
-              redeems.map((redeem) => (
-                <tr key={redeem.id}>
-                  <td className="p-2 border-b">{redeem.user?.name || '-'}</td>
-                  <td className="p-2 border-b">
-                    {redeem.product?.name || '-'}
-                  </td>
-                  <td className="p-2 border-b text-right">
-                    {formatPoints(redeem.points)}
-                  </td>
-                  <td className="p-2 border-b text-center">
-                    {new Date(redeem.createdAt).toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="p-2 border-b text-center">
-                    <button
-                      className="text-red-600 hover:underline"
-                      onClick={() => handleDeleteRedeem(redeem.id)}
-                    >
-                      Excluir
-                    </button>
-                  </td>
-                </tr>
-              ))
+              redeems.map((redeem) => {
+                const { user } = redeem;
+                const userName = `${user.name} - ${user.document}`;
+                return (
+                  <tr key={redeem.id}>
+                    <td className="p-2 border-b">{userName}</td>
+                    <td className="p-2 border-b">
+                      {redeem.product?.name || '-'}
+                    </td>
+                    <td className="p-2 border-b text-right">
+                      {formatPoints(redeem.points)}
+                    </td>
+                    <td className="p-2 border-b text-center">
+                      {new Date(redeem.createdAt).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="p-2 border-b text-center">
+                      <button
+                        className="text-red-600 hover:underline"
+                        onClick={() => handleDeleteRedeem(redeem.id)}
+                      >
+                        Excluir
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
+        <Pagination page={page} hasMore={hasMore} setPage={setPage} />
       </div>
     </div>
   );

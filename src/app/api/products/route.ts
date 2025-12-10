@@ -15,6 +15,11 @@ export async function GET(request: NextRequest) {
       image: true,
       createdAt: true,
       code: true,
+      _count: {
+        select: {
+          redeems: true,
+        },
+      },
     },
     where: {
       active: true,

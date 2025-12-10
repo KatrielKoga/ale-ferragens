@@ -248,6 +248,7 @@ export default function AdminProductsPage() {
             <th className="border px-2 py-1">Descrição</th>
             <th className="border px-2 py-1">Pontos</th>
             <th className="border px-2 py-1">Imagem</th>
+            <th className="border px-2 py-1">Resgates</th>
             <th className="border px-2 py-1">Ações</th>
           </tr>
         </thead>
@@ -274,7 +275,9 @@ export default function AdminProductsPage() {
               <tr key={product.id}>
                 <td className="border px-2 py-1">{product.name}</td>
                 <td className="border px-2 py-1">{product.description}</td>
-                <td className="border px-2 py-1">{Number(product.points)}</td>
+                <td className="border px-2 py-1 text-right">
+                  {Number(product.points)}
+                </td>
                 <td className="border px-2 py-1">
                   <Image
                     width={40}
@@ -283,6 +286,9 @@ export default function AdminProductsPage() {
                     alt={product.name}
                     className="w-10 h-10 object-cover"
                   />
+                </td>
+                <td className="border px-2 py-1 text-right">
+                  {Number(product._count.redeems)}
                 </td>
                 <td className="border px-2 py-1 flex gap-2">
                   <button

@@ -13,6 +13,7 @@ export const orderResponse = z.object({
   createdAt: z.date(),
   user: z.object({
     name: z.string(),
+    document: z.string(),
   }),
 });
 
