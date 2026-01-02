@@ -14,11 +14,13 @@ export async function GET(request: NextRequest) {
       createdAt: true,
       orders: {
         select: {
+          expiredAt: true,
           points: true,
         },
       },
       redeems: {
         select: {
+          expiredAt: true,
           points: true,
         },
       },
@@ -40,8 +42,12 @@ export async function GET(request: NextRequest) {
     orders: undefined,
     redeems: undefined,
     points:
-      user.orders.reduce((acc, order) => acc + order.points, 0) -
-      user.redeems.reduce((acc, redeem) => acc + redeem.points, 0),
+      user.orders
+        .filter((o) => o.expiredAt === null)
+        .reduce((acc, order) => acc + order.points, 0) -
+      user.redeems
+        .filter((r) => r.expiredAt === null)
+        .reduce((acc, redeem) => acc + redeem.points, 0),
   }));
   return NextResponse.json(usersWithPoints);
 }

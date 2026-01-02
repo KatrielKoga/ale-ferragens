@@ -116,7 +116,7 @@ export default function UserPage() {
                   {user.orders.map((order, idx) => (
                     <li
                       key={idx}
-                      className="border-b py-2 flex justify-between"
+                      className={`border-b py-2 flex justify-between ${order.expiredAt ? 'bg-gray-100 opacity-70' : ''}`}
                     >
                       <span>
                         Pontos:{' '}
@@ -124,6 +124,11 @@ export default function UserPage() {
                           + {order.points}
                         </span>
                       </span>
+                      {order.expiredAt && (
+                        <span className="text-red-600 italic ">
+                          ({formatDate(order.expiredAt)})
+                        </span>
+                      )}
                       <span>{formatDate(order.createdAt)}</span>
                     </li>
                   ))}
@@ -154,7 +159,7 @@ export default function UserPage() {
                   {user.redeems.map((redeem, idx) => (
                     <li
                       key={idx}
-                      className="border-b py-2 flex flex-col sm:flex-row sm:justify-between"
+                      className={`border-b py-2 flex flex-col sm:flex-row sm:justify-between ${redeem.expiredAt ? 'bg-gray-100 opacity-70' : ''}`}
                     >
                       <span>
                         {redeem.product?.name}, Pontos:{' '}
@@ -162,6 +167,11 @@ export default function UserPage() {
                           - {redeem.points}
                         </span>
                       </span>
+                      {redeem.expiredAt && (
+                        <span className="text-red-600 italic">
+                          ({formatDate(redeem.expiredAt)})
+                        </span>
+                      )}
                       <span>{formatDate(redeem.createdAt)}</span>
                     </li>
                   ))}

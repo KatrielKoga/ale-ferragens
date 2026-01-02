@@ -20,11 +20,13 @@ export async function GET(
     include: {
       orders: {
         select: {
+          expiredAt: true,
           points: true,
         },
       },
       redeems: {
         select: {
+          expiredAt: true,
           points: true,
         },
       },
@@ -40,6 +42,7 @@ export async function GET(
     select: {
       points: true,
       createdAt: true,
+      expiredAt: true,
     },
     orderBy: {
       createdAt: 'desc',
@@ -54,6 +57,7 @@ export async function GET(
     select: {
       points: true,
       createdAt: true,
+      expiredAt: true,
       product: {
         select: {
           name: true,
@@ -68,8 +72,12 @@ export async function GET(
   });
 
   const userPoints =
-    user.orders.reduce((acc, order) => acc + order.points, 0) -
-    user.redeems.reduce((acc, redeem) => acc + redeem.points, 0);
+    user.orders
+      .filter((order) => order.expiredAt === null)
+      .reduce((acc, order) => acc + order.points, 0) -
+    user.redeems
+      .filter((redeem) => redeem.expiredAt === null)
+      .reduce((acc, redeem) => acc + redeem.points, 0);
   return NextResponse.json({
     ...user,
     points: userPoints,
