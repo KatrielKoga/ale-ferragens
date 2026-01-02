@@ -11,6 +11,7 @@ export const orderResponse = z.object({
   id: z.uuid(),
   points: z.coerce.number().min(1),
   createdAt: z.date(),
+  expiredAt: z.date().nullable(),
   user: z.object({
     name: z.string(),
     document: z.string(),

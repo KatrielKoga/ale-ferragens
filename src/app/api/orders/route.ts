@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       id: true,
       points: true,
       createdAt: true,
+      expiredAt: true,
       user: {
         select: {
           name: true,

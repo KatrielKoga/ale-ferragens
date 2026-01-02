@@ -41,12 +41,14 @@ export const userByDocumentResponse = z.object({
     z.object({
       points: z.number(),
       createdAt: z.date(),
+      expiredAt: z.date().nullable(),
     })
   ),
   redeems: z.array(
     z.object({
       points: z.number(),
       createdAt: z.date(),
+      expiredAt: z.date().nullable(),
       product: z.object({
         name: z.string(),
       }),

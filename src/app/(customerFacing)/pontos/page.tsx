@@ -7,6 +7,7 @@ import {
   TicketCheck,
   TrendingUp,
   XCircle,
+  CalendarX,
 } from 'lucide-react';
 import { useState } from 'react';
 import WhatsappButton from '@/components/Whatsapp-button';
@@ -124,13 +125,26 @@ export default function Pontos() {
                   dados.orders.map((item, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center text-gray-700 bg-gray-50 p-3 rounded-md shadow-sm"
+                      className={`flex relative group items-center text-gray-700 ${item.expiredAt ? 'bg-gray-300' : 'bg-gray-50'} p-3 rounded-md shadow-sm`}
                     >
+                      {item.expiredAt && (
+                        <div className="absolute top-2 bg-gray-50 p-1 right-2 text-xs text-red-600 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                          Expirado em{' '}
+                          {new Date(item.expiredAt).toLocaleDateString('pt-BR')}
+                        </div>
+                      )}
                       <div>
-                        <CheckCircle
-                          size={18}
-                          className="text-green-500 mr-3 "
-                        />
+                        {item.expiredAt ? (
+                          <CalendarX
+                            size={18}
+                            className="text-gray-700 mr-3 "
+                          />
+                        ) : (
+                          <CheckCircle
+                            size={18}
+                            className="text-green-500 mr-3 "
+                          />
+                        )}
                       </div>
                       {Intl.NumberFormat('pt-BR', {
                         style: 'decimal',
@@ -144,7 +158,8 @@ export default function Pontos() {
                     key={1}
                     className="flex items-center text-gray-700 bg-gray-50 p-3 rounded-md shadow-sm"
                   >
-                    Você ainda não realizou nenhuma compra.
+                    Você ainda não realizou nenhuma compra no período
+                    promocional.
                   </li>
                 )}
               </ul>
@@ -180,7 +195,8 @@ export default function Pontos() {
                     key={1}
                     className="flex items-center text-gray-700 bg-gray-50 p-3 rounded-md shadow-sm"
                   >
-                    Você ainda não realizou nenhum resgate.
+                    Você ainda não realizou nenhum resgate no período
+                    promocional.
                   </li>
                 )}
               </ul>

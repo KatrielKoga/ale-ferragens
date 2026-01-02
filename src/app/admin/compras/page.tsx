@@ -207,6 +207,7 @@ export default function AdminPurchasesPage() {
               <th className="p-2 border-b">Usuário</th>
               <th className="p-2 border-b">Pontos</th>
               <th className="p-2 border-b">Data</th>
+              <th className="p-2 border-b">Expirado em</th>
               <th className="p-2 border-b">Ações</th>
             </tr>
           </thead>
@@ -235,6 +236,13 @@ export default function AdminPurchasesPage() {
                     </td>
                     <td className="p-2 border-b text-center">
                       {new Date(purchase.createdAt).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="p-2 border-b text-center">
+                      {purchase.expiredAt
+                        ? new Date(purchase.expiredAt).toLocaleDateString(
+                            'pt-BR'
+                          )
+                        : '-'}
                     </td>
                     <td className="p-2 border-b text-center">
                       <button

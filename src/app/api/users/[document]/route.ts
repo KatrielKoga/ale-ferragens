@@ -21,6 +21,10 @@ export async function GET(
         select: {
           points: true,
           createdAt: true,
+          expiredAt: true,
+        },
+        where: {
+          expiredAt: null,
         },
         orderBy: {
           createdAt: 'desc',
@@ -31,11 +35,15 @@ export async function GET(
         select: {
           createdAt: true,
           points: true,
+          expiredAt: true,
           product: {
             select: {
               name: true,
             },
           },
+        },
+        where: {
+          expiredAt: null,
         },
         orderBy: {
           createdAt: 'desc',
@@ -50,18 +58,24 @@ export async function GET(
 
   const [orders, redeems] = await Promise.all([
     prisma.order.findMany({
-      where: { userId: user.id,  },
+      where: { userId: user.id, expiredAt: null },
       select: { points: true },
     }),
     prisma.redeem.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id, expiredAt: null },
       select: { points: true },
     }),
   ]);
 
   const userPoints =
-    orders.reduce((acc: number, order: { points: number }) => acc + order.points, 0) -
-    redeems.reduce((acc: number, redeem: { points: number }) => acc + redeem.points, 0);
+    orders.reduce(
+      (acc: number, order: { points: number }) => acc + order.points,
+      0
+    ) -
+    redeems.reduce(
+      (acc: number, redeem: { points: number }) => acc + redeem.points,
+      0
+    );
   return NextResponse.json({
     ...user,
     points: userPoints,

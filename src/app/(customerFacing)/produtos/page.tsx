@@ -35,8 +35,9 @@ export default function Produtos() {
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             A cada um real gasto, você ganha 1 ponto! Troque seus pontos
-            acumulados por produtos incríveis e de alta qualidade. Confira nossa
-            seleção especial de produtos disponíveis para resgate!
+            acumulados no período promocional por produtos incríveis e de alta
+            qualidade. Confira nossa seleção especial de produtos disponíveis
+            para resgate!
           </p>
         </div>
 

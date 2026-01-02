@@ -13,8 +13,10 @@ export const redeemResponse = z.object({
   productId: z.uuid(),
   points: z.number(),
   createdAt: z.date(),
+  expiredAt: z.date().nullable(),
   user: z.object({
     name: z.string(),
+    document: z.string(),
   }),
   product: z.object({
     name: z.string(),

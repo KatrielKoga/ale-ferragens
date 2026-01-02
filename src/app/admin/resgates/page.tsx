@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { formatDocument, formatPoints } from '@/lib/formatters';
 import { Pagination } from '../../../components/Pagination';
+import { RedeemResponse } from '../../../lib/interfaces/redeems';
 
 type UserOption = {
   id: string;
@@ -13,21 +14,6 @@ type UserOption = {
 type ProductOption = {
   id: string;
   name: string;
-};
-
-type Redeem = {
-  id: string;
-  userId: string;
-  productId: string;
-  points: number;
-  createdAt: string;
-  user: {
-    name: string;
-    document: string;
-  };
-  product: {
-    name: string;
-  };
 };
 
 function RedeemForm({
@@ -187,7 +173,7 @@ function RedeemForm({
 }
 
 export default function AdminResgatesPage() {
-  const [redeems, setRedeems] = useState<Redeem[]>([]);
+  const [redeems, setRedeems] = useState<RedeemResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [page, setPage] = useState(1);
@@ -295,6 +281,7 @@ export default function AdminResgatesPage() {
               <th className="p-2 border-b">Produto</th>
               <th className="p-2 border-b">Pontos</th>
               <th className="p-2 border-b">Data</th>
+              <th className="p-2 border-b">Expirado em</th>
               <th className="p-2 border-b">Ações</th>
             </tr>
           </thead>
@@ -326,6 +313,11 @@ export default function AdminResgatesPage() {
                     </td>
                     <td className="p-2 border-b text-center">
                       {new Date(redeem.createdAt).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="p-2 border-b text-center">
+                      {redeem.expiredAt
+                        ? new Date(redeem.expiredAt).toLocaleDateString('pt-BR')
+                        : '-'}
                     </td>
                     <td className="p-2 border-b text-center">
                       <button
