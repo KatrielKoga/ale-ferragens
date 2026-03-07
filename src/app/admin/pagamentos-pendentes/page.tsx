@@ -19,7 +19,11 @@ function PendingPaymentForm({
   onSubmit,
   loading,
 }: {
-  onSubmit: (payment: { userId: string; valueInCents: number }) => void;
+  onSubmit: (payment: {
+    userId: string;
+    valueInCents: number;
+    createdAt: string;
+  }) => void;
   loading: boolean;
 }) {
   const [userSearch, setUserSearch] = useState('');
@@ -29,6 +33,9 @@ function PendingPaymentForm({
   const [isPositive, setIsPositive] = useState(true);
   const [errors, setErrors] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
+  const [createdAt, setCreatedAt] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
 
   async function handleUserSearch(e: React.ChangeEvent<HTMLInputElement>) {
     setUserSearch(e.target.value);
@@ -66,7 +73,11 @@ function PendingPaymentForm({
     }
     const valueInCents = isPositive ? parsedValue * 100 : -parsedValue * 100;
     setErrors(null);
-    onSubmit({ userId: selectedUser.id, valueInCents });
+    onSubmit({
+      userId: selectedUser.id,
+      valueInCents,
+      createdAt,
+    });
     setValue('');
     setSelectedUser(null);
     setUserSearch('');
@@ -143,6 +154,17 @@ function PendingPaymentForm({
           </label>
         </div>
       </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium">Data</label>
+        <input
+          type="date"
+          value={createdAt}
+          onChange={(e) => setCreatedAt(e.target.value)}
+          className="border px-2 py-1 rounded"
+          required
+          placeholder="dd/mm/yyyy"
+        />
+      </div>
       {errors && <div className="text-red-600 text-sm mb-2">{errors}</div>}
       <button
         type="submit"
@@ -161,6 +183,11 @@ export default function AdminPendingPaymentsPage() {
   const [creating, setCreating] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [filterUserSearch, setFilterUserSearch] = useState('');
+  const [filterUserOptions, setFilterUserOptions] = useState<UserOption[]>([]);
+  const [selectedFilterUser, setSelectedFilterUser] =
+    useState<UserOption | null>(null);
+  const [filterSearching, setFilterSearching] = useState(false);
 
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
@@ -168,9 +195,8 @@ export default function AdminPendingPaymentsPage() {
     name: string;
     document: string;
   } | null>(null);
-  const [modalPayments, setModalPayments] = useState<PendingPaymentResponse[]>(
-    []
-  );
+  const [modalPayments, setModalPayments] =
+    useState<PendingPaymentResponse | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [modalPage, setModalPage] = useState(1);
   const [modalHasMore, setModalHasMore] = useState(false);
@@ -195,6 +221,9 @@ export default function AdminPendingPaymentsPage() {
     const params = new URLSearchParams();
     if (page > 1) params.set('page', page.toString());
     params.set('limit', '10');
+    if (selectedFilterUser) {
+      params.set('document', selectedFilterUser.document);
+    }
     const res = await fetch(`/api/pending-payments?${params.toString()}`);
     const data: PendingPaymentByUserResponse = await res.json();
     setSummaries(data);
@@ -211,28 +240,66 @@ export default function AdminPendingPaymentsPage() {
     const res = await fetch(`/api/pending-payments?${params.toString()}`);
     const data: PendingPaymentByUserResponse = await res.json();
     const first = data[0];
-    setModalPayments(first.pendingPayments || []);
-    setModalHasMore((first.pendingPayments || []).length === 10);
+    setModalPayments(first);
+    setModalHasMore((first?.pendingPayments || []).length === 10);
     setModalLoading(false);
   }
 
   useEffect(() => {
     fetchSummaries();
-  }, [page]);
+  }, [page, selectedFilterUser]);
+
+  async function handleFilterUserSearch(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setFilterUserSearch(e.target.value);
+    setSelectedFilterUser(null);
+    if (e.target.value.length < 3) {
+      setFilterUserOptions([]);
+      return;
+    }
+    setFilterSearching(true);
+    const params = new URLSearchParams();
+    params.set('search', e.target.value);
+    params.set('limit', '5');
+    const res = await fetch(`/api/users?${params.toString()}`);
+    const data = await res.json();
+    setFilterUserOptions(data);
+    setFilterSearching(false);
+  }
+
+  function handleFilterUserSelect(user: UserOption) {
+    setSelectedFilterUser(user);
+    setFilterUserSearch(`${user.name} (${formatDocument(user.document)})`);
+    setFilterUserOptions([]);
+    setPage(1); // Reset page when filtering
+  }
+
+  function clearFilter() {
+    setSelectedFilterUser(null);
+    setFilterUserSearch('');
+    setPage(1);
+  }
 
   async function handleCreatePayment({
     userId,
     valueInCents,
+    createdAt,
   }: {
     userId: string;
     valueInCents: number;
+    createdAt: string;
   }) {
     setCreating(true);
     try {
       const res = await fetch('/api/pending-payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, valueInCents }),
+        body: JSON.stringify({
+          userId,
+          valueInCents,
+          createdAt: new Date(createdAt + 'T00:00:00.000-03:00').toISOString(),
+        }),
       });
       if (!res.ok) {
         const error = await res.json();
@@ -283,6 +350,42 @@ export default function AdminPendingPaymentsPage() {
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Pagamentos Pendentes</h1>
       <PendingPaymentForm onSubmit={handleCreatePayment} loading={creating} />
+      <div className="mb-4 relative">
+        <label className="block text-sm font-medium mb-2">
+          Filtrar por Usuário
+        </label>
+        <input
+          type="text"
+          value={filterUserSearch}
+          onChange={handleFilterUserSearch}
+          className="border px-2 py-1 rounded w-full max-w-md"
+          placeholder="Digite o nome ou documento para filtrar"
+        />
+        {filterUserOptions.length > 0 && (
+          <ul className="absolute z-10 bg-white border rounded w-full max-w-md mt-1 max-h-40 overflow-auto">
+            {filterUserOptions.map((user) => (
+              <li
+                key={user.id}
+                className="px-2 py-1 hover:bg-blue-100 cursor-pointer"
+                onClick={() => handleFilterUserSelect(user)}
+              >
+                {user.name} ({formatDocument(user.document)})
+              </li>
+            ))}
+          </ul>
+        )}
+        {filterSearching && (
+          <div className="text-xs text-gray-500 mt-1">Buscando...</div>
+        )}
+        {selectedFilterUser && (
+          <button
+            onClick={clearFilter}
+            className="ml-2 text-blue-600 hover:underline text-sm"
+          >
+            Limpar filtro
+          </button>
+        )}
+      </div>
       <div className="bg-white rounded shadow mt-6">
         <h2 className="text-lg font-semibold p-4 border-b">
           Usuários com Pagamentos Pendentes
@@ -298,13 +401,13 @@ export default function AdminPendingPaymentsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={2} className="p-4 text-center">
+                <td colSpan={3} className="p-4 text-center">
                   Carregando...
                 </td>
               </tr>
             ) : summaries.length === 0 ? (
               <tr>
-                <td colSpan={2} className="p-4 text-center">
+                <td colSpan={3} className="p-4 text-center">
                   Nenhum usuário encontrado.
                 </td>
               </tr>
@@ -334,23 +437,29 @@ export default function AdminPendingPaymentsPage() {
         <Pagination page={page} hasMore={hasMore} setPage={setPage} />
       </div>
 
-      {modalOpen && selectedUser && (
+      {modalOpen && modalPayments && selectedUser && (
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
           <div
             ref={modalRef}
             className="bg-white rounded shadow max-w-2xl w-full max-h-max overflow-auto"
           >
-            <div className="p-4 border-b flex justify-between">
+            <div className="px-4 pt-4 flex justify-between">
               <h3 className="text-lg font-semibold">
-                Pagamentos Pendentes de {selectedUser.name} (
-                {formatDocument(selectedUser.document)})
+                Pagamentos Pendentes de {modalPayments.user.name} (
+                {formatDocument(modalPayments.user.document)})
               </h3>
+
               <button
                 onClick={() => setModalOpen(false)}
                 className="text-gray-500 border border-gray-500 px-2 py-1 rounded hover:bg-gray-100"
               >
                 X
               </button>
+            </div>
+            <div className="p-4 pt-2 border-b">
+              <h4 className="text-sm text-gray-800">
+                Saldo: {formatCurrency(modalPayments.balanceInCents)}
+              </h4>
             </div>
             <div className="p-4">
               <table className="w-full text-left">
@@ -368,14 +477,14 @@ export default function AdminPendingPaymentsPage() {
                         Carregando...
                       </td>
                     </tr>
-                  ) : modalPayments?.length === 0 ? (
+                  ) : modalPayments.pendingPayments?.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="p-4 text-center">
                         Nenhum pagamento encontrado.
                       </td>
                     </tr>
                   ) : (
-                    modalPayments?.map((payment) => (
+                    modalPayments.pendingPayments?.map((payment) => (
                       <tr key={payment.id}>
                         <td className="p-2 border-b text-right">
                           {formatCurrency(payment.valueInCents)}

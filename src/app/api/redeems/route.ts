@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { formatTextToSearch } from '@/lib/utils/format-text';
 
 export async function POST(request: NextRequest) {
   const { userId, productId } = await request.json();

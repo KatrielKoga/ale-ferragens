@@ -6,7 +6,7 @@ import {
 } from '@/lib/interfaces/pending-payments';
 
 export async function POST(request: NextRequest) {
-  const { userId, valueInCents }: PendingPaymentCreateBody =
+  const { userId, valueInCents, createdAt }: PendingPaymentCreateBody =
     await request.json();
   const user = await prisma.user.findFirst({
     where: {
@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
     data: {
       userId,
       valueInCents,
+      createdAt: createdAt || new Date(),
     },
   });
   return NextResponse.json(pendingPayment, { status: 201 });
