@@ -4,6 +4,13 @@ export const formatPoints = (points: number) => {
   }).format(points);
 };
 
+export const formatCurrency = (valueInCents: number) => {
+  return Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(valueInCents / 100);
+};
+
 export function formatDocument(document: string) {
   if (document.length === 11) {
     return document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');

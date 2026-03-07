@@ -121,6 +121,12 @@ export function AdminNavbar({ children }: { children: React.ReactNode }) {
         <NavLink href="/admin/compras" setIsMenuOpen={setIsMenuOpen}>
           Registro de compras
         </NavLink>
+        <NavLink
+          href="/admin/pagamentos-pendentes"
+          setIsMenuOpen={setIsMenuOpen}
+        >
+          Pagamentos Pendentes
+        </NavLink>
         <NavLink href="/admin/resgates" setIsMenuOpen={setIsMenuOpen}>
           Resgates
         </NavLink>

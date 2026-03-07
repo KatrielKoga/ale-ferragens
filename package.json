@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "prisma generate && next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:dev": "prisma migrate dev --name"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.850.0",
