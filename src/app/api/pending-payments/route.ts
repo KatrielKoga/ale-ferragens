@@ -6,8 +6,12 @@ import {
 } from '@/lib/interfaces/pending-payments';
 
 export async function POST(request: NextRequest) {
-  const { userId, valueInCents, createdAt }: PendingPaymentCreateBody =
-    await request.json();
+  const {
+    userId,
+    valueInCents,
+    observation,
+    createdAt,
+  }: PendingPaymentCreateBody = await request.json();
   const user = await prisma.user.findFirst({
     where: {
       id: userId,
@@ -20,6 +24,7 @@ export async function POST(request: NextRequest) {
     data: {
       userId,
       valueInCents,
+      observation,
       createdAt: createdAt || new Date(),
     },
   });
@@ -54,6 +59,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         valueInCents: true,
+        observation: true,
         createdAt: true,
       },
     });

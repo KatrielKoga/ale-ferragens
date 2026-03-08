@@ -22,6 +22,7 @@ function PendingPaymentForm({
   onSubmit: (payment: {
     userId: string;
     valueInCents: number;
+    observation?: string;
     createdAt: string;
   }) => void;
   loading: boolean;
@@ -36,6 +37,7 @@ function PendingPaymentForm({
   const [createdAt, setCreatedAt] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
+  const [observation, setObservation] = useState<string>('');
 
   async function handleUserSearch(e: React.ChangeEvent<HTMLInputElement>) {
     setUserSearch(e.target.value);
@@ -76,11 +78,13 @@ function PendingPaymentForm({
     onSubmit({
       userId: selectedUser.id,
       valueInCents,
+      observation: observation.trim() || undefined,
       createdAt,
     });
     setValue('');
     setSelectedUser(null);
     setUserSearch('');
+    setObservation('');
   }
 
   return (
@@ -163,6 +167,18 @@ function PendingPaymentForm({
           className="border px-2 py-1 rounded"
           required
           placeholder="dd/mm/yyyy"
+        />
+      </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium">
+          Observação (opcional)
+        </label>
+        <textarea
+          value={observation}
+          onChange={(e) => setObservation(e.target.value)}
+          className="border px-2 py-1 rounded w-full"
+          rows={3}
+          placeholder="Adicione uma observação sobre este pagamento pendente"
         />
       </div>
       {errors && <div className="text-red-600 text-sm mb-2">{errors}</div>}
@@ -284,10 +300,12 @@ export default function AdminPendingPaymentsPage() {
   async function handleCreatePayment({
     userId,
     valueInCents,
+    observation,
     createdAt,
   }: {
     userId: string;
     valueInCents: number;
+    observation?: string;
     createdAt: string;
   }) {
     setCreating(true);
@@ -298,6 +316,7 @@ export default function AdminPendingPaymentsPage() {
         body: JSON.stringify({
           userId,
           valueInCents,
+          observation,
           createdAt: new Date(createdAt + 'T00:00:00.000-03:00').toISOString(),
         }),
       });
@@ -413,7 +432,11 @@ export default function AdminPendingPaymentsPage() {
               </tr>
             ) : (
               summaries.map((summary, index) => (
-                <tr key={index} className=" hover:bg-gray-100">
+                <tr
+                  key={index}
+                  className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleUserClick(summary.user)}
+                >
                   <td className="p-2 border-b">
                     {summary.user.name} ({formatDocument(summary.user.document)}
                     )
@@ -441,7 +464,7 @@ export default function AdminPendingPaymentsPage() {
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
           <div
             ref={modalRef}
-            className="bg-white rounded shadow max-w-2xl w-full max-h-max overflow-auto"
+            className="bg-white rounded shadow max-w-2xl w-full max-h-dvh overflow-auto"
           >
             <div className="px-4 pt-4 flex justify-between">
               <h3 className="text-lg font-semibold">
@@ -467,32 +490,36 @@ export default function AdminPendingPaymentsPage() {
                   <tr>
                     <th className="p-2 border-b">Valor</th>
                     <th className="p-2 border-b">Data</th>
+                    <th className="p-2 border-b">Observação</th>
                     <th className="p-2 border-b">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {modalLoading ? (
                     <tr>
-                      <td colSpan={3} className="p-4 text-center">
+                      <td colSpan={4} className="p-4 text-center">
                         Carregando...
                       </td>
                     </tr>
                   ) : modalPayments.pendingPayments?.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="p-4 text-center">
+                      <td colSpan={4} className="p-4 text-center">
                         Nenhum pagamento encontrado.
                       </td>
                     </tr>
                   ) : (
                     modalPayments.pendingPayments?.map((payment) => (
                       <tr key={payment.id}>
-                        <td className="p-2 border-b text-right">
+                        <td className="p-2 border-b text-right text-nowrap">
                           {formatCurrency(payment.valueInCents)}
                         </td>
                         <td className="p-2 border-b text-center">
                           {new Date(payment.createdAt).toLocaleDateString(
                             'pt-BR'
                           )}
+                        </td>
+                        <td className="p-2 border-b">
+                          {payment.observation || ''}
                         </td>
                         <td className="p-2 border-b text-center">
                           <button

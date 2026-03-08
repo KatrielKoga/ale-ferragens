@@ -3,6 +3,7 @@ import z from 'zod';
 export const pendingPaymentCreateBody = z.object({
   userId: z.uuid(),
   valueInCents: z.coerce.number(),
+  observation: z.string().optional(),
   createdAt: z.date().optional(),
 });
 
@@ -18,6 +19,7 @@ export const pendingPaymentResponse = z.object({
       z.object({
         id: z.uuid(),
         valueInCents: z.coerce.number().min(1),
+        observation: z.string().nullable().optional(),
         createdAt: z.date(),
       })
     )
